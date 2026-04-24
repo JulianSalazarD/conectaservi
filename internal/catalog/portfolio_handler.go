@@ -16,15 +16,15 @@ func NewPortfolioHandler(repo PortfolioRepository) *PortfolioHandler {
 }
 
 func (h *PortfolioHandler) mountOn(r *gin.RouterGroup) {
-	g := r.Group("/services/:sid/portfolio")
+	g := r.Group("/services/:id/portfolio")
 	g.POST("", h.Create)
 	g.GET("", h.List)
-	g.PUT("/:id", h.Update)
-	g.DELETE("/:id", h.Delete)
+	g.PUT("/:pid", h.Update)
+	g.DELETE("/:pid", h.Delete)
 }
 
 func (h *PortfolioHandler) Create(c *gin.Context) {
-	sid, err := uuid.Parse(c.Param("sid"))
+	sid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		writeBindingError(c, err)
 		return
@@ -47,7 +47,7 @@ func (h *PortfolioHandler) Create(c *gin.Context) {
 }
 
 func (h *PortfolioHandler) List(c *gin.Context) {
-	sid, err := uuid.Parse(c.Param("sid"))
+	sid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		writeBindingError(c, err)
 		return
@@ -61,7 +61,7 @@ func (h *PortfolioHandler) List(c *gin.Context) {
 }
 
 func (h *PortfolioHandler) Update(c *gin.Context) {
-	id, err := uuid.Parse(c.Param("id"))
+	id, err := uuid.Parse(c.Param("pid"))
 	if err != nil {
 		writeBindingError(c, err)
 		return
@@ -91,7 +91,7 @@ func (h *PortfolioHandler) Update(c *gin.Context) {
 }
 
 func (h *PortfolioHandler) Delete(c *gin.Context) {
-	id, err := uuid.Parse(c.Param("id"))
+	id, err := uuid.Parse(c.Param("pid"))
 	if err != nil {
 		writeBindingError(c, err)
 		return

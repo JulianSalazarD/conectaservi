@@ -128,7 +128,8 @@ func (r *pgCategoryRepo) Delete(ctx context.Context, id uuid.UUID) error {
 	res, err := r.db.ExecContext(ctx, q, id)
 	if err != nil {
 		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.ForeignKeyViolation {
+		if errors.As(err, &pgErr) &&
+			(pgErr.Code == pgerrcode.ForeignKeyViolation || pgErr.Code == pgerrcode.RestrictViolation) {
 			return ErrCategoryHasServices
 		}
 		return fmt.Errorf("delete category: %w", err)
