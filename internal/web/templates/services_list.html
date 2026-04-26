@@ -1,0 +1,33 @@
+{{define "services_list.html"}}{{template "_header" .}}
+<section>
+  <div class="section-head">
+    <h1>Servicios</h1>
+    <a class="btn btn-primary" href="/web/services/new">+ Nuevo servicio</a>
+  </div>
+  {{if .Flash}}<p class="flash">{{.Flash}}</p>{{end}}
+  {{if .Items}}
+  <table>
+    <thead>
+      <tr><th>Título</th><th>Categoría</th><th>Precio base</th><th>Activo</th><th></th></tr>
+    </thead>
+    <tbody>
+      {{range .Items}}
+      <tr>
+        <td>{{.Titulo}}</td>
+        <td>{{index $.CategoryNames .CategoryID}}</td>
+        <td>${{printf "%.2f" .PrecioBase}}</td>
+        <td>{{if .IsActive}}Sí{{else}}No{{end}}</td>
+        <td class="row-actions">
+          <form method="POST" action="/web/services/{{.ID}}/delete" onsubmit="return confirm('¿Eliminar el servicio?');">
+            <button type="submit" class="link-danger">Eliminar</button>
+          </form>
+        </td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <p class="empty">No hay servicios. <a href="/web/services/new">Crear el primero</a>.</p>
+  {{end}}
+</section>
+{{template "_footer" .}}{{end}}

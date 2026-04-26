@@ -10,6 +10,7 @@ import (
 	"github.com/joho/godotenv"
 
 	"github.com/JulianSalazarD/conectaservi/internal/catalog"
+	"github.com/JulianSalazarD/conectaservi/internal/web"
 	"github.com/JulianSalazarD/conectaservi/pkg/database"
 )
 
@@ -33,6 +34,12 @@ func main() {
 	r := gin.Default()
 	v1 := r.Group("/api/v1")
 	catalog.New(db).Mount(v1)
+
+	webMod, err := web.New(db)
+	if err != nil {
+		log.Fatalf("init web module: %v", err)
+	}
+	webMod.Mount(r)
 
 	addr := os.Getenv("HTTP_ADDR")
 	if addr == "" {

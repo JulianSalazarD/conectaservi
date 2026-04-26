@@ -1,0 +1,10 @@
+{{define "home.html"}}{{template "_header" .}}
+<section class="hero">
+  <h1>Panel de administración</h1>
+  <p>Interfaz web del módulo <strong>catalog</strong> — formularios HTML server-rendered con Go <code>html/template</code>.</p>
+  <ul class="cards">
+    <li><a href="/web/categories"><h2>Categorías</h2><p>Gestionar categorías de servicios.</p></a></li>
+    <li><a href="/web/services"><h2>Servicios</h2><p>Gestionar servicios publicados por prestadores.</p></a></li>
+  </ul>
+</section>
+{{template "_footer" .}}{{end}}

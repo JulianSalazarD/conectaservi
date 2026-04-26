@@ -1,11 +1,10 @@
-# ConectaServi — módulo `catalog`
+# ConectaServi — módulos `catalog` y `web`
 
-Módulo CRUD del proyecto **ConectaServi** (evidencia SENA **GA7-220501096-AA2-EV01**).
-Expone las 3 entidades del catálogo (`categories`, `services`, `portfolio_items`) por API REST.
+Módulos del proyecto **ConectaServi** entregados en las evidencias SENA **GA7-220501096-AA2-EV01** (API REST JSON) y **GA7-220501096-AA2-EV02** (interfaz web HTML).
 
-- **Stack**: Go 1.22 · PostgreSQL 15 · `database/sql` + driver `pgx` · Gin
-- **Arquitectura**: monolito modular (`internal/catalog/`) con *package by feature*
-- **Estilo**: *accept interfaces, return structs* (Pike) — handlers reciben `XxxRepository` (interface), `NewPgXxxRepo` devuelve struct concreto
+- **Stack**: Go 1.22 · PostgreSQL 15 · `database/sql` + driver `pgx` · Gin · `html/template`
+- **Arquitectura**: monolito modular con *package by feature* — features `catalog` (dominio + CRUD JSON) y `web` (UI HTML server-rendered)
+- **Estilo**: *accept interfaces, return structs* (Pike) — handlers reciben `XxxRepository` (interface), `NewPgXxxRepo` devuelve struct concreto. La feature `web` reutiliza esos repositorios sin duplicar lógica de dominio.
 
 ## Estructura
 
@@ -22,6 +21,15 @@ conectaservi/
 │   ├── category_handler.go / service_handler.go / portfolio_handler.go
 │   ├── module.go                                   New(db) + Mount(r) — wiring repos→handlers→rutas
 │   └── *_test.go                                   tests unitarios de entidad / VO
+├── internal/web/                     EV02 — feature web (HTML + formularios server-side)
+│   ├── module.go                                   New(db) + Mount(r) — registra rutas y /static
+│   ├── home.go                                     GET /  (landing)
+│   ├── category_pages.go / service_pages.go       handlers GET/POST por entidad
+│   ├── render.go                                   render(c,name,data) + userMessage(err)
+│   ├── templates.go                                //go:embed de plantillas y assets
+│   ├── templates/*.html                            html/template (equivalente JSP)
+│   ├── static/styles.css                           CSS plano servido en /static
+│   └── category_pages_test.go                     httptest + repo fake (6 tests)
 ├── pkg/database/postgres.go          Open(ctx, dsn) *sql.DB con pool
 ├── db/schema.sql                     DDL + seed (1 user + 1 provider)
 └── .env.example
@@ -41,12 +49,34 @@ psql -h localhost -U postgres -d conectaservi -f db/schema.sql
 cp .env.example .env
 # editar DATABASE_URL si hace falta
 
-# 3. Correr la API
+# 3. Correr el servidor (API + UI web)
 go run ./cmd/api
 # [GIN-debug] Listening and serving HTTP on :8080
+# Abrir http://localhost:8080/  →  panel HTML
 ```
 
-## Endpoints (14)
+## Interfaz web (EV02)
+
+Páginas server-rendered con `html/template` (equivalente Go de JSP). Formularios HTML envían datos al servidor con métodos GET y POST. Reutiliza los repositorios del feature `catalog`.
+
+| Método | Ruta                              | Acción                            |
+|--------|-----------------------------------|-----------------------------------|
+| GET    | `/`                               | Home                              |
+| GET    | `/web/categories`                 | Lista de categorías               |
+| GET    | `/web/categories/new`             | Formulario de creación            |
+| POST   | `/web/categories`                 | Procesa creación                  |
+| GET    | `/web/categories/:id/edit`        | Formulario de edición             |
+| POST   | `/web/categories/:id`             | Procesa edición                   |
+| POST   | `/web/categories/:id/delete`      | Eliminación                       |
+| GET    | `/web/services`                   | Lista de servicios                |
+| GET    | `/web/services/new`               | Formulario de creación            |
+| POST   | `/web/services`                   | Procesa creación                  |
+| POST   | `/web/services/:id/delete`        | Eliminación                       |
+| GET    | `/static/styles.css`              | Asset estático (CSS)              |
+
+Validación: si el dominio rechaza la entrada (slug inválido, precio negativo…), el handler **re-renderiza el mismo formulario** con los valores ingresados y el mensaje de error en español. Tras un éxito redirige (303) a la lista con un mensaje *flash*.
+
+## Endpoints REST (EV01) — 14
 
 | Método | Ruta                                        | CRUD                   |
 |--------|---------------------------------------------|------------------------|
@@ -113,6 +143,7 @@ curl $B/services/<SID>/portfolio     # → []
 ```bash
 go test ./...
 # ok  github.com/JulianSalazarD/conectaservi/internal/catalog
+# ok  github.com/JulianSalazarD/conectaservi/internal/web   (httptest sobre repo fake)
 ```
 
 ## Estándares aplicados

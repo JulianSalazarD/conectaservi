@@ -1,0 +1,20 @@
+{{define "categories_form.html"}}{{template "_header" .}}
+<section>
+  <h1>{{if .IsEdit}}Editar categoría{{else}}Nueva categoría{{end}}</h1>
+  {{if .Error}}<p class="error">{{.Error}}</p>{{end}}
+  <form method="POST" action="{{.Action}}" class="stack">
+    <label>
+      <span>Nombre</span>
+      <input type="text" name="nombre" value="{{.Form.Nombre}}" required maxlength="100">
+    </label>
+    <label>
+      <span>Slug <small>(kebab-case: solo minúsculas, números y guiones)</small></span>
+      <input type="text" name="slug" value="{{.Form.Slug}}" required pattern="[a-z0-9]+(-[a-z0-9]+)*" maxlength="100">
+    </label>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Guardar</button>
+      <a href="/web/categories" class="btn">Cancelar</a>
+    </div>
+  </form>
+</section>
+{{template "_footer" .}}{{end}}
